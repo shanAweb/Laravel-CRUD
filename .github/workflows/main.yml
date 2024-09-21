@@ -3,24 +3,21 @@ name: Laravel CI/CD
 on:
   push:
     branches:
-      - main  # Adjust branch name as needed
+      - main
 
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-      # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up PHP
       - name: Set up PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
 
-      # Cache dependencies
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -32,38 +29,32 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      # Install Composer dependencies
       - name: Install Composer dependencies
         run: sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      # Install Node.js and NPM
       - name: Install Node.js and NPM
         run: |
           sudo apt-get update
           sudo apt-get install -y nodejs npm
 
-      # Install NPM dependencies
       - name: Install NPM dependencies
         run: sudo npm install
 
+      # Build assets (using the correct script, e.g., 'build')
       - name: Build assets
-        run: sudo npm run prod
+        run: sudo npm run build
 
-      # Create .env file from GitHub secret
       - name: Create .env file from secret
         run: |
           echo "${{ secrets.LARAVEL_ENV }}" > .env
         shell: bash
 
-      # Run Laravel key generate
       - name: Generate app key
         run: sudo php artisan key:generate
 
-      # Run Laravel migrations
       - name: Run migrations
         run: sudo php artisan migrate --force
 
-      # Restart Nginx and PHP-FPM (adjust these commands if needed)
       - name: Restart Nginx and PHP-FPM
         run: |
           sudo systemctl restart nginx
