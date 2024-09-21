@@ -43,7 +43,7 @@ jobs:
           node-version: '16' # Adjust version if needed
 
       - name: Install NPM dependencies
-        run: sudo npm install
+        run: sudo apt npm install
 
       - name: Build assets
         run: sudo npm run prod
