@@ -32,17 +32,20 @@ jobs:
       - name: Install Composer dependencies
         run: sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
+      # Clean up node_modules folder if exists
+      - name: Cleanup node_modules with sudo
+        run: sudo rm -rf /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/node_modules
+
       - name: Install Node.js and NPM
         run: |
           sudo apt-get update
           sudo apt-get install -y nodejs npm
 
-      - name: Install NPM dependencies
-        run: sudo npm install
+      - name: Install NPM dependencies without sudo
+        run: npm install
 
-      # Build assets (using the correct script, e.g., 'build')
       - name: Build assets
-        run: sudo npm run build
+        run: npm run build
 
       - name: Create .env file from secret
         run: |
