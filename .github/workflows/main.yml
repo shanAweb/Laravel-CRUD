@@ -36,14 +36,15 @@ jobs:
       - name: Install Composer dependencies
         run: sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
-      # Install Node.js and NPM dependencies
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16' # Adjust version if needed
+      # Install Node.js and NPM
+      - name: Install Node.js and NPM
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nodejs npm
 
+      # Install NPM dependencies
       - name: Install NPM dependencies
-        run: sudo apt npm install
+        run: sudo npm install
 
       - name: Build assets
         run: sudo npm run prod
