@@ -10,9 +10,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Cleanup node_modules directory with sudo before checkout
-      - name: Cleanup node_modules with sudo
-        run: sudo rm -rf /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/node_modules
+      # Reset permissions on the Laravel-CRUD directory before checking out code
+      - name: Reset permissions on public/build/assets
+        run: sudo chown -R $(whoami) /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/public/build/assets
 
       # Checkout the repository
       - name: Checkout code
