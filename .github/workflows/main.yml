@@ -10,9 +10,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Reset permissions on the Laravel-CRUD directory before checking out code
-      - name: Reset permissions on public/build/assets
-        run: sudo chown -R $(whoami) /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/public/build/assets
+      # Reset permissions on the entire Laravel-CRUD directory
+      - name: Reset permissions on Laravel-CRUD directory
+        run: sudo chown -R $(whoami):$(whoami) /home/ubuntu/actions-runner/_work/Laravel-CRUD
 
       # Checkout the repository
       - name: Checkout code
