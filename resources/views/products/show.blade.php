@@ -9,7 +9,7 @@
                     <div class="card-header">Product Details</div>
 
                     <div class="card-body">
-                        <p>Shan Asif </p>
+                        <p>Shan Asif Created this:::::</p>
                         <p><strong>Name:</strong> {{ $product->name }}</p>
                         <p><strong>Description:</strong> {{ $product->description }}</p>
                         <p><strong>Price:</strong> {{ $product->price }}</p>
