@@ -13,7 +13,7 @@
                             @csrf 
                             <div class="form-group">
                                 <label for="name">Name</label>
-                                <input type="text" name="name" id="name" class="form-control">
+                                <input type="text" name="name" id="name" class="form-control" style="background:red">
                             </div>
                             <div class="form-group">
                                 <label for="description">Description</label>
