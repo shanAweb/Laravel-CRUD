@@ -12,6 +12,7 @@
                         <table class="table">
                             <thead>
                                 <tr>
+                                    <th>Owner</th>
                                     <th>Name</th>
                                     <th>Description</th>
                                     <th>Price</th>
@@ -21,6 +22,7 @@
                             <tbody>
                                 @foreach($products as $product)
                                     <tr>
+                                        <td>shanAweb</td>
                                         <td>{{ $product->name }}</td>
                                         <td>{{ $product->description }}</td>
                                         <td>{{ $product->price }}</td>
