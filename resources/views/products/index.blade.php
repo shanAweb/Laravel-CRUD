@@ -14,7 +14,6 @@
                                 <tr>
                                     <th>Owner</th>
                                     <th>Name</th>
-                                    <th>Description</th>
                                     <th>Price</th>
                                     <th>Action</th>
                                 </tr>
@@ -24,7 +23,6 @@
                                     <tr>
                                         <td>shanAweb</td>
                                         <td>{{ $product->name }}</td>
-                                        <td>{{ $product->description }}</td>
                                         <td>{{ $product->price }}</td>
                                         <td>
                                             <a href="{{ route('products.show', $product->id) }}">View</a>
