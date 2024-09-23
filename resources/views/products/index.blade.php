@@ -21,7 +21,7 @@
                             <tbody>
                                 @foreach($products as $product)
                                     <tr>
-                                        <td>shanAweb</td>
+                                        <td>shanAweb - Shan Asif</td>
                                         <td>{{ $product->name }}</td>
                                         <td>{{ $product->price }}</td>
                                         <td>
