@@ -10,15 +10,19 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Reset permissions on the /var/www/html/project directory
+      # Checkout the repository into the default GitHub Actions workspace
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set permissions for /var/www/html/project directory
       - name: Reset permissions on project directory
         run: sudo chown -R $(whoami):$(whoami) /var/www/html/project
 
-      # Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          path: /var/www/html/project  # Ensure the code is checked out in the correct directory
+      # Copy the checked-out files to the Nginx boot directory (/var/www/html/project)
+      - name: Copy project files to Nginx directory
+        run: |
+          sudo rm -rf /var/www/html/project/*
+          sudo cp -R ${{ github.workspace }}/* /var/www/html/project
 
       # Set up PHP 8.2
       - name: Set up PHP 8.2
