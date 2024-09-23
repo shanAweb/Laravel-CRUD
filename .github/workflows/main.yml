@@ -10,13 +10,15 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Reset permissions on the entire Laravel-CRUD directory
-      - name: Reset permissions on Laravel-CRUD directory
-        run: sudo chown -R $(whoami):$(whoami) /home/ubuntu/actions-runner/_work/Laravel-CRUD
+      # Reset permissions on the /var/www/html/project directory
+      - name: Reset permissions on project directory
+        run: sudo chown -R $(whoami):$(whoami) /var/www/html/project
 
       # Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          path: /var/www/html/project  # Ensure the code is checked out in the correct directory
 
       # Set up PHP 8.2
       - name: Set up PHP 8.2
@@ -24,12 +26,10 @@ jobs:
         with:
           php-version: 8.2
 
-      # Get Composer cache directory
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
 
-      # Cache Composer dependencies
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
@@ -37,9 +37,10 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-      # Install Composer dependencies
       - name: Install Composer dependencies
-        run: sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
+        run: |
+          cd /var/www/html/project
+          sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
 
       # Install Node.js and NPM
       - name: Install Node.js and NPM
@@ -47,37 +48,46 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nodejs npm
 
-      # Install NPM dependencies
       - name: Install NPM dependencies
-        run: sudo npm install
+        run: |
+          cd /var/www/html/project
+          sudo npm install
 
-      # Build assets
       - name: Build assets
-        run: sudo npm run build
-
-      # Create .env file from secret
-      - name: Create .env file from secret
         run: |
-          echo "${{ secrets.LARAVEL_ENV }}" > .env
-        shell: bash
+          cd /var/www/html/project
+          sudo npm run build
 
-      # Clear cache and config
-      - name: Clear Laravel cache
+      # Create .env file manually with basic contents
+      - name: Create .env file
         run: |
-          sudo php artisan config:clear
-          sudo php artisan cache:clear
-          sudo php artisan route:clear
-          sudo php artisan view:clear
+          cd /var/www/html/project
+          echo "APP_NAME=Laravel
+          APP_ENV=local
+          APP_KEY=
+          APP_DEBUG=true
+          APP_URL=http://localhost
 
-      # Generate Laravel app key
+          LOG_CHANNEL=stack
+
+          DB_CONNECTION=mysql
+          DB_HOST=localhost
+          DB_PORT=3306
+          DB_DATABASE=awp
+          DB_USERNAME=localhost
+          DB_PASSWORD=" > .env
+
       - name: Generate app key
-        run: sudo php artisan key:generate
+        run: |
+          cd /var/www/html/project
+          sudo php artisan key:generate
 
-      # Run Laravel migrations
+      # Run migrations
       - name: Run migrations
-        run: sudo php artisan migrate --force
+        run: |
+          cd /var/www/html/project
+          sudo php artisan migrate --force
 
-      # Restart Nginx and PHP-FPM
       - name: Restart Nginx and PHP-FPM
         run: |
           sudo systemctl restart nginx
