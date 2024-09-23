@@ -18,12 +18,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Ensure correct branch is checked out and pull the latest changes
+      - name: Fetch latest changes
+        run: git fetch origin && git reset --hard origin/main
+
       # Set up PHP 8.2
       - name: Set up PHP 8.2
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
 
+      # Cache Composer dependencies
       - name: Get Composer cache directory
         id: composer-cache
         run: echo "::set-output name=dir::$(composer config cache-files-dir)"
@@ -44,23 +49,37 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nodejs npm
 
+      # Install NPM dependencies
       - name: Install NPM dependencies
         run: sudo npm install
 
+      # Build assets
       - name: Build assets
         run: sudo npm run build
 
+      # Clear Laravel caches (config, route, view)
+      - name: Clear and optimize Laravel cache
+        run: |
+          sudo php artisan cache:clear
+          sudo php artisan config:cache
+          sudo php artisan route:cache
+          sudo php artisan view:cache
+
+      # Create .env file from secret
       - name: Create .env file from secret
         run: |
           echo "${{ secrets.LARAVEL_ENV }}" > .env
         shell: bash
 
+      # Generate app key
       - name: Generate app key
         run: sudo php artisan key:generate
 
+      # Run migrations
       - name: Run migrations
         run: sudo php artisan migrate --force
 
+      # Restart Nginx and PHP-FPM to ensure new content is served
       - name: Restart Nginx and PHP-FPM
         run: |
           sudo systemctl restart nginx
