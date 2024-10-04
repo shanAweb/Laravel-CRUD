@@ -14,22 +14,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      # Force remove the node_modules directory to avoid permission issues
+      - name: Force remove node_modules
+        run: |
+          sudo rm -rf /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/node_modules
+
       # Build the Docker image
       - name: Build Docker image
         run: |
-          sudo docker build -t laravel-app:latest .
+          docker build -t laravel-app:latest .
 
       # Stop and remove the old container if it exists
       - name: Stop existing container
         run: |
-          sudo docker stop laravel-app || true
-          sudo docker rm laravel-app || true
+          docker stop laravel-app || true
+          docker rm laravel-app || true
 
       # Run a new container from the built image
       - name: Run Docker container
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
-          sudo docker run -d \
+          docker run -d \
           --name laravel-app \
           --env-file .env \
           -p 80:80 \
@@ -38,24 +43,24 @@ jobs:
       # Generate Laravel app key
       - name: Generate Laravel APP_KEY
         run: |
-          sudo docker exec laravel-app php /var/www/html/artisan key:generate
-          
+          docker exec laravel-app php /var/www/html/artisan key:generate
+
       # Set proper permissions for necessary directories
       - name: Set directory permissions
         run: |
-          sudo docker exec laravel-app chmod -R 775 /var/www/html/bootstrap/cache
-          sudo docker exec laravel-app chmod -R 775 /var/www/html/storage
-          sudo docker exec laravel-app chown -R www-data:www-data /var/www/html
+          docker exec laravel-app chmod -R 775 /var/www/html/bootstrap/cache
+          docker exec laravel-app chmod -R 775 /var/www/html/storage
+          docker exec laravel-app chown -R www-data:www-data /var/www/html
 
       # Run Laravel migrations
       - name: Run Laravel migrations
         run: |
-          sudo docker exec laravel-app php /var/www/html/artisan migrate --force
+          docker exec laravel-app php /var/www/html/artisan migrate --force
 
       # Clear and cache Laravel config, routes, etc.
       - name: Optimize Laravel
         run: |
-          sudo docker exec laravel-app php /var/www/html/artisan config:clear
-          sudo docker exec laravel-app php /var/www/html/artisan config:cache
-          sudo docker exec laravel-app php /var/www/html/artisan route:cache
-          sudo docker exec laravel-app php /var/www/html/artisan view:cache
+          docker exec laravel-app php /var/www/html/artisan config:clear
+          docker exec laravel-app php /var/www/html/artisan config:cache
+          docker exec laravel-app php /var/www/html/artisan route:cache
+          docker exec laravel-app php /var/www/html/artisan view:cache
