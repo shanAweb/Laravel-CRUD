@@ -42,7 +42,7 @@ jobs:
           sudo docker run -d \
             --name laravel-app \
             --env-file .env \
-            -p 8080:80 \
+            -p 9000:80 \
             laravel-app:latest
 
       # Set proper permissions for necessary directories
