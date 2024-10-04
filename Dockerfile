@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install zip
 
 # Copy Nginx configuration file
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY ./nginx.conf /etc/nginx/sites-available/default
 
 # Set the working directory to the Laravel app
 WORKDIR /var/www/html
