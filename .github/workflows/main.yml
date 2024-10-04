@@ -52,11 +52,6 @@ jobs:
           sudo docker exec laravel-app chmod -R 775 /var/www/html/storage
           sudo docker exec laravel-app chown -R www-data:www-data /var/www/html
 
-      # Run Laravel migrations
-      - name: Run Laravel migrations
-        run: |
-          sudo docker exec laravel-app php /var/www/html/artisan migrate --force
-
       # Clear and cache Laravel config, routes, etc.
       - name: Optimize Laravel
         run: |
