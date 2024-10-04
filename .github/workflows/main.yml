@@ -40,15 +40,15 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
           sudo docker run -d \
-          --name laravel-app \
-          --env-file .env \
-          -p 8080:80 \
-          laravel-app:latest
+            --name laravel-app \
+            --env-file .env \
+            -p 8080:80 \
+            laravel-app:latest
 
       # Generate Laravel app key
       - name: Generate Laravel APP_KEY
         run: |
-          sudo docker exec laravel-app php /var/www/html/artisan key:generate
+          sudo docker exec laravel-app /bin/bash -c "cd /var/www/html && php artisan key:generate"
 
       # Set proper permissions for necessary directories
       - name: Set directory permissions
