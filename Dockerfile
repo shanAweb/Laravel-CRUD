@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip
+RUN get-update && apt-get install nginx -y
 
 # Set the working directory
 COPY . /var/www/html
