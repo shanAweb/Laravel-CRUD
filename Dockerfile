@@ -1,7 +1,7 @@
-# Use PHP 8.2 as base image
+# Use PHP 8.2
 FROM php:8.2-fpm
 
-# Install common php extension dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libfreetype-dev \
     libjpeg62-turbo-dev \
@@ -14,23 +14,28 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip
 
-# Set the working directory
-COPY . /var/www/html
+# Copy Nginx configuration file
+COPY ./nginx.conf /etc/nginx/nginx.conf
+
+# Set the working directory to the Laravel app
 WORKDIR /var/www/html
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage
+# Copy all files into the working directory
+COPY . /var/www/html
 
-# Install Composer
+# Ensure proper permissions for Laravel storage and cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
+
+# Install composer
 COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
 
-# Copy composer.json to workdir & install dependencies
-COPY composer.json ./
+# Install PHP dependencies via composer
 RUN composer install
 
-# Expose port 9000 for PHP-FPM
-EXPOSE 9000
+# Expose port 80 for Nginx
+EXPOSE 80
 
-# Set the default command to run php-fpm
-CMD ["php-fpm"]
+# Start PHP-FPM and Nginx
+CMD service nginx start && php-fpm
