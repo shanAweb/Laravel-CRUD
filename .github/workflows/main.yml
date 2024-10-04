@@ -1,4 +1,4 @@
-name: Laravel CI/CD
+name: Deploy Laravel App with Docker
 
 on:
   push:
@@ -10,66 +10,52 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Reset permissions on the entire Laravel-CRUD directory
-      - name: Reset permissions on Laravel-CRUD directory
-        run: sudo chown -R $(whoami):$(whoami) /home/ubuntu/actions-runner/_work/Laravel-CRUD
-
-      # Checkout the repository
+      # Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      # Set up PHP 8.2
-      - name: Set up PHP 8.2
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
-      - name: Install Composer dependencies
-        run: sudo composer install --no-progress --no-interaction --prefer-dist --optimize-autoloader
-
-      # Install Node.js and NPM
-      - name: Install Node.js and NPM
+      # Build the Docker image
+      - name: Build Docker image
         run: |
-          sudo apt-get update
-          sudo apt-get install -y nodejs npm
+          docker build -t laravel-app:latest .
 
-      - name: Install NPM dependencies
-        run: sudo npm install
-
-      - name: Build assets
-        run: sudo npm run build
-
-      - name: Create .env file from secret
+      # Stop and remove the old container if it exists
+      - name: Stop existing container
         run: |
-          echo "${{ secrets.LARAVEL_ENV }}" > .env
-        shell: bash
+          docker stop laravel-app || true
+          docker rm laravel-app || true
 
-      - name: Generate app key
-        run: sudo php artisan key:generate
+      # Run a new container from the built image
+      - name: Run Docker container
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+          docker run -d \
+          --name laravel-app \
+          --env-file .env \
+          -p 80:80 \
+          laravel-app:latest
 
-      - name: Run migrations
-        run: sudo php artisan migrate --force --path=/var/www/html/project
-
-      # Set correct permissions for Laravel's storage and cache directories
+      # Generate Laravel app key
+      - name: Generate Laravel APP_KEY
+        run: |
+          docker exec laravel-app php /var/www/html/artisan key:generate
+          
+      # Set proper permissions for necessary directories
       - name: Set directory permissions
         run: |
-          sudo chown -R www-data:www-data /var/www/html/project/storage
-          sudo chown -R www-data:www-data /var/www/html/project/bootstrap/cache
-          sudo chmod -R 775 /var/www/html/project/storage
-          sudo chmod -R 775 /var/www/html/project/bootstrap/cache
+          docker exec laravel-app chmod -R 775 /var/www/html/bootstrap/cache
+          docker exec laravel-app chmod -R 775 /var/www/html/storage
+          docker exec laravel-app chown -R www-data:www-data /var/www/html
 
-      - name: Restart Nginx and PHP-FPM
+      # Run Laravel migrations
+      - name: Run Laravel migrations
         run: |
-          sudo systemctl restart nginx
-          sudo systemctl restart php8.2-fpm
+          docker exec laravel-app php /var/www/html/artisan migrate --force
+
+      # Clear and cache Laravel config, routes, etc.
+      - name: Optimize Laravel
+        run: |
+          docker exec laravel-app php /var/www/html/artisan config:clear
+          docker exec laravel-app php /var/www/html/artisan config:cache
+          docker exec laravel-app php /var/www/html/artisan route:cache
+          docker exec laravel-app php /var/www/html/artisan view:cache
