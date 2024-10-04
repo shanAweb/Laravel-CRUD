@@ -45,11 +45,6 @@ jobs:
             -p 8080:80 \
             laravel-app:latest
 
-      # Generate Laravel app key
-      - name: Generate Laravel APP_KEY
-        run: |
-          sudo docker exec laravel-app /bin/bash -c "cd /var/www/html && php artisan key:generate"
-
       # Set proper permissions for necessary directories
       - name: Set directory permissions
         run: |
