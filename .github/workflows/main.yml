@@ -10,11 +10,21 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      # Cleanup public directory before checkout
+      - name: Cleanup public directory
+        run: |
+          sudo rm -rf /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/public
+
       # Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Force remove the node_modules directory to avoid permission issues
+      # Install Node.js dependencies (if needed)
+      - name: Install npm dependencies
+        run: |
+          npm install
+
+      # Force remove node_modules directory to avoid permission issues
       - name: Force remove node_modules
         run: |
           sudo rm -rf /home/ubuntu/actions-runner/_work/Laravel-CRUD/Laravel-CRUD/node_modules
